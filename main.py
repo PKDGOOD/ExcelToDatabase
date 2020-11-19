@@ -4,9 +4,11 @@ from sqlalchemy import create_engine
 
 engine = create_engine("mysql+pymysql://root:0000@localhost:3306/justq", encoding='utf-8')
 
-from sqlalchemy.dialects.mysql import BIGINT, DECIMAL, VARCHAR, DATE
+
+from sqlalchemy import Table, MetaData, Column, insert
+from sqlalchemy.orm.session import Session,sessionmaker
 from sqlalchemy.orm import mapper
-from sqlalchemy import Table, MetaData, Column
+from sqlalchemy.dialects.mysql import BIGINT, DECIMAL, VARCHAR, DATE
 
 metadata = MetaData()
 
@@ -40,8 +42,27 @@ mapper(SampleData, sampledata)
 
 metadata.create_all(engine)
 
-# df = pd.read_excel('./SampleData.xlsx', sheet_name='SalesOrders', header=1)
-# df.columns = ['OrderDate', 'Region', 'Rep', 'Item', 'Unit', 'UnitCost', 'EastRegulation', 'Total']
-# df['OrderDate'] = df['OrderDate'].dt.date
-# print(df)
-# df.to_sql(name='sampledt', con = engine, if_exists='append', index=False)
+
+df = pd.read_excel('./SampleData.xlsx', sheet_name='SalesOrders', header=1)
+df.columns = ['OrderDate', 'Region', 'Rep', 'Item', 'Unit', 'UnitCost', 'EastRegulation', 'Total']
+df['OrderDate'] = df['OrderDate'].dt.date
+print(df)
+df.to_sql(name='sampledata', con=engine, if_exists='append', index=False)
+
+print('-------------------------------')
+
+# Session = sessionmaker(bind=engine)
+# s = Session()
+# for i in df.index:
+#     data = (SampleData(i+1, df.iloc[i, 0], df.iloc[i, 1], df.iloc[i, 2], df.iloc[i, 3], df.iloc[i, 4], df.iloc[i, 5], df.iloc[i, 6], df.iloc[i, 7]))
+#     s.add(data)
+
+# s.query(SampleData)
+# s.commit()
+
+
+
+
+# for i in df.index:
+#     sampledata.insert(SampleData(i+1, df.iloc[i, 0], df.iloc[i, 1], df.iloc[i, 2],
+#                        df.iloc[i, 3], df.iloc[i, 4], df.iloc[i, 5], df.iloc[i, 6], df.iloc[i, 7]))
