@@ -4,30 +4,44 @@ from sqlalchemy import create_engine
 
 engine = create_engine("mysql+pymysql://root:0000@localhost:3306/justq", encoding='utf-8')
 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.dialects.mysql import BIGINT,DECIMAL,VARCHAR
-from sqlalchemy import Column, Date
+from sqlalchemy.dialects.mysql import BIGINT, DECIMAL, VARCHAR, DATE
+from sqlalchemy.orm import mapper
+from sqlalchemy import Table, MetaData, Column
 
-Base = declarative_base()
+metadata = MetaData()
 
-class Test(Base):
-    __tablename__='sampledt'
-    __table_args__={'extend_existing':True}
-    OrderDate = Column(Date)
-    Region = Column(VARCHAR)
-    Rep = Column(VARCHAR)
-    Item = Column(VARCHAR, primary_key=True)
-    Unit = Column(BIGINT)
-    UnitCost = Column(DECIMAL)
-    EastRegulation = Column(VARCHAR)
-    Total =Column(DECIMAL)
+sampledata = Table('sampledata', metadata,
+                   Column('Sno', BIGINT, primary_key=True),
+                   Column('OrderDate', DATE),
+                   Column('Region', VARCHAR(45)),
+                   Column('Rep', VARCHAR(45)),
+                   Column('Item', VARCHAR(45)),
+                   Column('Unit', BIGINT),
+                   Column('UnitCost', DECIMAL(10, 2)),
+                   Column('EastRegulation', VARCHAR(45)),
+                   Column('Total', DECIMAL(10, 2))
+                   )
 
-metadata = Base.metadata
+
+class SampleData(object):
+    def __init__(self, Sno, OrderDate, Region, Rep, Item, Unit, UnitCost, EastRegulation, Total):
+        self.Sno = Sno
+        self.OrderDate = OrderDate
+        self.Region = Region
+        self.Rep = Rep
+        self.Item = Item
+        self.Unit = Unit
+        self.UnitCost = UnitCost
+        self.EastRegulation = EastRegulation
+        self.Total = Total
+
+
+mapper(SampleData, sampledata)
+
 metadata.create_all(engine)
 
-df = pd.read_excel('./SampleData.xlsx', sheet_name='SalesOrders', header=1)
-df.columns = ['OrderDate', 'Region', 'Rep', 'Item', 'Unit', 'UnitCost', 'EastRegulation', 'Total']
-df['OrderDate'] = df['OrderDate'].dt.date
-print(df)
-df.to_sql(name='sampledt', con = engine, if_exists='append', index=False)
-
+# df = pd.read_excel('./SampleData.xlsx', sheet_name='SalesOrders', header=1)
+# df.columns = ['OrderDate', 'Region', 'Rep', 'Item', 'Unit', 'UnitCost', 'EastRegulation', 'Total']
+# df['OrderDate'] = df['OrderDate'].dt.date
+# print(df)
+# df.to_sql(name='sampledt', con = engine, if_exists='append', index=False)
